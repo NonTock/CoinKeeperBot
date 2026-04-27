@@ -22,7 +22,7 @@ async def get_stats_handler(message: types.Message):
 async def get_resent_handler(message: types.Message):
     result = get_resent(message.from_user.id)
     print(result)
-    if str(result) == "[]":
+    if not result:
         await message.answer("У вас пока не зарегистрировано трат")
     else:
         await message.answer("Ваши последние траты:")
