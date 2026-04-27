@@ -4,9 +4,17 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 from db import add_expense, create_db, get_amount, get_resent
-dp = Dispatcher()
+from logging.handlers import RotatingFileHandler
 
-logging.basicConfig(level=logging.INFO)
+file_handler = RotatingFileHandler('bot.log', maxBytes=1024*1024, backupCount=2)
+stream_handler = logging.StreamHandler()
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[file_handler, stream_handler],
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+dp = Dispatcher()
 
 @dp.message(Command('start'))
 async def start_handler(message: types.Message):
