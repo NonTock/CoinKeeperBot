@@ -6,6 +6,8 @@ from aiogram.filters.command import Command
 from db import add_expense, create_db, get_amount, get_resent
 dp = Dispatcher()
 
+logging.basicConfig(level=logging.INFO)
+
 @dp.message(Command('start'))
 async def start_handler(message: types.Message):
     await message.answer(f"Привет, {message.from_user.first_name}! Отправь трату в формате: 100 шаурма")
@@ -25,9 +27,10 @@ async def get_resent_handler(message: types.Message):
     if not result:
         await message.answer("У вас пока не зарегистрировано трат")
     else:
-        await message.answer("Ваши последние траты:")
-        for expense, category in result:
-            await message.answer(f'Потрачено {expense} рублей на категорию {category.title()}')
+        final_mess = "Ваши последние траты:\n"
+        for i, (expense, category) in enumerate(result, 1):
+            final_mess += f"{i}. {expense} рублей на {category.title()}\n"
+        await message.answer(final_mess)
 
 
 @dp.message()
