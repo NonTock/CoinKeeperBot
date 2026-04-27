@@ -3,12 +3,32 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
-from db import add_expense
+from db import add_expense, create_db, get_amount, get_resent
 dp = Dispatcher()
 
 @dp.message(Command('start'))
 async def start_handler(message: types.Message):
     await message.answer(f"Привет, {message.from_user.first_name}! Отправь трату в формате: 100 шаурма")
+
+@dp.message(Command('getstats'))
+async def get_stats_handler(message: types.Message):
+    result = get_amount(message.from_user.id)
+    if result is None:
+        await message.answer("У вас пока не зарегистрировано трат")
+    else:
+        await message.answer(f" ваши траты: {result} рублей")
+
+@dp.message(Command('getresent'))
+async def get_resent_handler(message: types.Message):
+    result = get_resent(message.from_user.id)
+    print(result)
+    if str(result) == "[]":
+        await message.answer("У вас пока не зарегистрировано трат")
+    else:
+        await message.answer("Ваши последние траты:")
+        for expense, category in result:
+            await message.answer(f'Потрачено {expense} рублей на категорию {category.title()}')
+
 
 @dp.message()
 async def answer_message(message: types.Message):
@@ -26,7 +46,9 @@ async def answer_message(message: types.Message):
         add_expense(message.from_user.id, float(text[0]), text[1])
         await message.answer(f"Записал: {text[0]} руб. в категорию '{text[1]}'")
 
+
 async def main():
+    create_db()
     bot = Bot(token=API_KEY)
     await dp.start_polling(bot)
 if __name__ == '__main__':
